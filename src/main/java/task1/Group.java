@@ -9,6 +9,11 @@ public class Group<T> extends Task<T> {
     public String groupUuid;
     private List<Task<T>> tasks;
 
+    @Override
+    public String getId() {
+        return super.getId();
+    }
+
     public Group<T> addTask(Task<T> task) {
         if (tasks == null) {
             tasks = new ArrayList<>();
@@ -27,9 +32,20 @@ public class Group<T> extends Task<T> {
     }
 
     @Override
+    void stamp(Visitor<T> visitor) {
+        this.setHeader("groupID",visitor.onGroupStart(this).get("groupID"));
+        for (Task<T> task: tasks) {
+            visitor.onGroupStart(this);
+            task.stamp(visitor);
+        }
+        visitor.onGroupEnd();
+    }
+
+    @Override
     public void apply(T arg) {
         this.freeze();
         tasks = Collections.unmodifiableList(tasks);
+        this.stamp(new VisitorImpl<>());
         for (Task<T> task: tasks) {
             task.apply(arg);
         }

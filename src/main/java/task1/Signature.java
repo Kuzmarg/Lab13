@@ -14,4 +14,9 @@ public class Signature<T> extends Task<T> {
         this.freeze();
         consumer.accept(arg);
     }
+
+    @Override
+    void stamp(Visitor<T> visitor) {
+        this.setHeader("groups", visitor.onSignature(this).get("groups"));
+    }
 }
